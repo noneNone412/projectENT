@@ -1,0 +1,24 @@
+#version 450
+
+// Declare a struct for uniform data
+layout(set = 0, binding = 0) uniform ImageSizeData {
+    ivec2 imageSize; // Image size uniform
+};
+
+layout(std430, binding = 1) buffer DataBuffer {
+    vec4 inputColors[];  // This is a dynamically-sized array
+};
+
+layout(binding = 2, rgba8) uniform writeonly image2D outputImage;
+
+void main() {
+    // Get the pixel coordinates based on the global invocation ID
+    ivec2 pixelCords = ivec2(gl_GlobalInvocationID.xy);
+    
+    // Ensure pixel coordinates are within the valid range
+    if (pixelCords.x < imageSize.x && pixelCords.y < imageSize.y) {
+        int index = pixelCords.y * imageSize.x + pixelCords.x; // Calculate the index
+        // Write the corresponding color to the output image at the specified pixel coordinates
+        imageStore(outputImage, pixelCords, inputColors[index]);
+    }
+}
